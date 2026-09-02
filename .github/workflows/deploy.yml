@@ -20,7 +20,7 @@ jobs:
         with:
           distribution: "temurin"
           java-version: "21"
-
+      
       # Usamos Gradle en lugar de Maven
       - name: Build with Gradle
         run: ./gradlew bootJar -x test
@@ -36,7 +36,11 @@ jobs:
         run: |
           ssh -i ~/.ssh/deploy_key ec2-user@${{ vars.EC2_HOST }} 'mkdir -p /home/ec2-user/app'
           scp -i ~/.ssh/deploy_key build/libs/*.jar ec2-user@${{ vars.EC2_HOST }}:/home/ec2-user/app/
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
+      - name: Build with Gradle
+        run: ./gradlew bootJar -x test
       - name: Restart Spring Boot App via SSH
         run: |
           ssh -i ~/.ssh/deploy_key ec2-user@${{ vars.EC2_HOST }} '
